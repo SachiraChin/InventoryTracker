@@ -1,0 +1,39 @@
+﻿<Window x:Class="InventoryTracker.Views.DatabaseConnectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InventoryTracker"
+        xmlns:helpers="clr-namespace:InventoryTracker.Helpers"
+        xmlns:models="clr-namespace:InventoryTracker.Models"
+        mc:Ignorable="d"
+        Title="Database Connection" Height="380" Width="500" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen" ScrollViewer.VerticalScrollBarVisibility="Disabled" UseLayoutRounding="False"
+        DataContext="{Binding DatabaseConnectionViewModel, Source={StaticResource Locator}}" ResizeMode="NoResize" IsEnabled="{Binding Enabled, Mode=OneWay}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <helpers:ComparisonConverter x:Key="ComparisonConverter"></helpers:ComparisonConverter>
+    </Window.Resources>
+    <StackPanel Margin="5">
+        <TextBlock VerticalAlignment="Center">Server Name</TextBlock>
+        <TextBox VerticalContentAlignment="Center" Text="{Binding SqlServerConnectionInfo.ServerName, Mode=TwoWay}"></TextBox>
+        <TextBlock VerticalAlignment="Center">Authentication</TextBlock>
+        <ComboBox VerticalContentAlignment="Center" ItemsSource="{Binding SqlServerAuthenticationTypes}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding SqlServerConnectionInfo.SqlServerAuthenticationType, Mode=TwoWay}"></ComboBox>
+        <TextBlock VerticalAlignment="Center">Username</TextBlock>
+        <TextBox VerticalContentAlignment="Center" Text="{Binding SqlServerConnectionInfo.Username, Mode=TwoWay}" IsEnabled="{Binding SqlServerConnectionInfo.SqlServerAuthenticationType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:SqlServerAuthenticationType.SqlServerAuthentication}}"></TextBox>
+        <TextBlock VerticalAlignment="Center">Password</TextBlock>
+        <PasswordBox VerticalContentAlignment="Center" PasswordChanged="PasswordBox_OnPasswordChanged" IsEnabled="{Binding SqlServerConnectionInfo.SqlServerAuthenticationType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:SqlServerAuthenticationType.SqlServerAuthentication}}"></PasswordBox>
+        <TextBlock VerticalAlignment="Center">Database</TextBlock>
+        <TextBox VerticalContentAlignment="Center" Text="{Binding SqlServerConnectionInfo.DatabaseName, Mode=TwoWay}"></TextBox>
+        <CheckBox VerticalAlignment="Center" IsChecked="{Binding ShowAdvancedOptions, Mode=TwoWay}">Show Advanced Options</CheckBox>
+        <StackPanel Visibility="{Binding ShowAdvancedOptions, Converter={StaticResource BooleanToVisibilityConverter}, Mode=TwoWay}">
+            <CheckBox VerticalAlignment="Center" IsChecked="{Binding SqlServerConnectionInfo.Encrypt, Mode=TwoWay}">Encrypt</CheckBox>
+            <CheckBox VerticalAlignment="Center" IsChecked="{Binding SqlServerConnectionInfo.MultipleActiveResultSets, Mode=TwoWay}">Multiple Active Result Sets</CheckBox>
+            <CheckBox VerticalAlignment="Center" IsChecked="{Binding SqlServerConnectionInfo.TrustServerCertificate, Mode=TwoWay}">Trust Server Certificate</CheckBox>
+            <TextBlock VerticalAlignment="Center">Connection Timeout</TextBlock>
+            <TextBox VerticalContentAlignment="Center" Text="{Binding SqlServerConnectionInfo.ConnectionTimeout, Mode=TwoWay}" PreviewTextInput="NumberValidationTextBox" DataObject.Pasting="TextBoxPasting"></TextBox>
+        </StackPanel>
+        <CheckBox VerticalAlignment="Center" IsChecked="{Binding SaveConnectionInfo, Mode=TwoWay}">Remember Database Details</CheckBox>
+        <CheckBox VerticalAlignment="Center" IsChecked="{Binding CreateDatabaseIfNotExists, Mode=TwoWay}">Create Database If Not Exists</CheckBox>
+        <Button Width="100" Command="{Binding ConnectToDatabaseCommand}">Connect</Button>
+    </StackPanel>
+</Window>
