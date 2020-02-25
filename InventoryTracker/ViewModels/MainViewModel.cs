@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using AutoMapper;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -185,6 +186,7 @@ namespace InventoryTracker.ViewModels
         public RelayCommand SaveDivisionsCommand { get; set; }
         public RelayCommand SaveInventoryItemsCommand { get; set; }
         public RelayCommand SearchCommand { get; set; }
+        public RelayCommand<KeyEventArgs> SearchKeyUpCommand { get; set; }
 
         public MainViewModel(IWindowNavigationService navigationService, IMapper mapper)
         {
@@ -195,6 +197,7 @@ namespace InventoryTracker.ViewModels
             SaveDivisionsCommand = new RelayCommand(SaveDivisionsCommandHandler);
             SaveInventoryItemsCommand = new RelayCommand(SaveInventoryItemsCommandHandler);
             SearchCommand = new RelayCommand(SearchCommandHandler);
+            SearchKeyUpCommand = new RelayCommand<KeyEventArgs>(SearchKeyUpCommandHandler);
         }
 
         private async void ViewLoadedCommandHandler(RoutedEventArgs args)
@@ -243,7 +246,16 @@ namespace InventoryTracker.ViewModels
                 .Where(i => 
                     (regionId == null || regionId <= 0 || i.RegionId == regionId)
                     && (divisionId == null || divisionId <= 0 || i.DivisionId == divisionId)
-                    && (searchText == null || searchText == "" || i.BorrowerName.Contains(searchText) || i.BorrowerNIC.Contains(searchText) || i.ItemSerialNumber.Contains(searchText) || i.ItemType.Contains(searchText) || i.Unit.Contains(searchText))
+                    && (searchText == null || searchText == ""
+                                           || i.InventoryItemId.ToString().Contains(searchText)
+                                           || i.BorrowerName.Contains(searchText) 
+                                           || i.BorrowerNIC.Contains(searchText) 
+                                           || i.ItemSerialNumber.Contains(searchText) 
+                                           || i.ItemType.Contains(searchText) 
+                                           || i.Region.RegionName.Contains(searchText)
+                                           || i.Division.DivisionName.Contains(searchText)
+                                           || i.Unit.Contains(searchText)
+                                           )
                 )
                 .ToListAsync();
             InventoryItems = new ObservableCollection<InventoryItemModel>(_mapper.Map<List<InventoryItemModel>>(inventoryItems));
@@ -252,6 +264,8 @@ namespace InventoryTracker.ViewModels
             {
                 inventoryItemModel.Region = Regions.FirstOrDefault(e => e.RegionId == inventoryItemModel.RegionId);
                 inventoryItemModel.Division = Divisions.FirstOrDefault(e => e.DivisionId == inventoryItemModel.DivisionId);
+
+                inventoryItemModel.ItemHash = inventoryItemModel.GetHash();
             }
 
             EnableInventoryItems = true;
@@ -327,14 +341,19 @@ namespace InventoryTracker.ViewModels
 
                 foreach (var inventoryItemModel in InventoryItems)
                 {
-                    var inventoryItem = _mapper.Map<InventoryItem>(inventoryItemModel);
-                    if (inventoryItem.Region == null || inventoryItem.Region.RegionId <= 0 || inventoryItem.Division == null || inventoryItem.Division.DivisionId <= 0)
+                    if (inventoryItemModel.Region == null || inventoryItemModel.Region.RegionId <= 0 || inventoryItemModel.Division == null || inventoryItemModel.Division.DivisionId <= 0)
                         continue;
 
-                    inventoryItem.RegionId = inventoryItem.Region.RegionId;
-                    inventoryItem.Region = null;
+                    inventoryItemModel.RegionId = inventoryItemModel.Region.RegionId;
+                    inventoryItemModel.DivisionId = inventoryItemModel.Division.DivisionId;
 
-                    inventoryItem.DivisionId = inventoryItem.Division.DivisionId;
+                    var newHash = inventoryItemModel.GetHash();
+                    if (newHash.Equals(inventoryItemModel.ItemHash))
+                        continue;
+                    
+                    var inventoryItem = _mapper.Map<InventoryItem>(inventoryItemModel);
+
+                    inventoryItem.Region = null;
                     inventoryItem.Division = null;
 
                     if (inventoryItem.InventoryItemId > 0)
@@ -358,6 +377,14 @@ namespace InventoryTracker.ViewModels
         private async void SearchCommandHandler()
         {
             await LoadInventoryItems(SearchRegionId, SearchDivisionId, SearchText);
+        }
+
+        private void SearchKeyUpCommandHandler(KeyEventArgs obj)
+        {
+            if (obj.Key != Key.Enter)
+                return;
+
+            SearchCommandHandler();
         }
     }
 }

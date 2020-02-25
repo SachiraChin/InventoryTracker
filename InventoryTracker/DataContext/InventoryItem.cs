@@ -22,8 +22,7 @@ namespace InventoryTracker.DataContext
         public Division Division { get; set; }
         public string Unit { get; set; }
         public string ItemCondition { get; set; }
-        public bool Returned { get; set; }
         public DateTimeOffset BorrowedDate { get; set; }
-        public DateTimeOffset? ReturnedDate { get; set; }
+        public bool IsWorking { get; set; }
     }
 }

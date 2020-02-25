@@ -17,8 +17,6 @@ namespace InventoryTracker.ViewModels
 {
     public class DatabaseConnectionViewModel : ViewModelBase, IDialogValueProvider
     {
-        private const int DefaultViewHeight = 250;
-        private const int AdvancedViewHeight = 350;
         private const string ConfigFileName = "connection-info.json";
 
         private SqlServerConnectionInfoModel _sqlServerConnectionInfo;

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using GalaSoft.MvvmLight;
 using InventoryTracker.Helpers;
@@ -21,9 +24,8 @@ namespace InventoryTracker.Models
         private DivisionModel _division;
         private string _unit;
         private string _itemCondition;
-        private bool _returned;
         private DateTimeOffset _borrowedDate = DateTimeOffset.Now;
-        private DateTimeOffset? _returnedDate;
+        private bool _isWorking = true;
 
         public int InventoryItemId
         {
@@ -138,24 +140,6 @@ namespace InventoryTracker.Models
             }
         }
 
-        public bool Returned
-        {
-            get => _returned;
-            set
-            {
-                _returned = value;
-                RaisePropertyChanged();
-                if (value)
-                {
-                    ReturnedDate = DateTimeOffset.Now;
-                }
-                else
-                {
-                    ReturnedDate = null;
-                }
-            }
-        }
-
         public DateTimeOffset BorrowedDate
         {
             get => _borrowedDate;
@@ -166,16 +150,20 @@ namespace InventoryTracker.Models
             }
         }
 
-        public DateTimeOffset? ReturnedDate
+        public bool IsWorking
         {
-            get => _returnedDate;
+            get => _isWorking;
             set
             {
-                _returnedDate = value;
+                _isWorking = value;
                 RaisePropertyChanged();
             }
         }
 
+        [JsonIgnore]
+        public string ItemHash { get; set; }
+
+        [JsonIgnore]
         public List<DivisionModel> Divisions { get; set; }
 
         private void SetDivisions(int regionId)
@@ -191,6 +179,21 @@ namespace InventoryTracker.Models
             {
                 Division = null;
             }
+        }
+
+        public string GetHash()
+        {
+            var jsonString = JsonSerializer.Serialize(this);
+            using var md5Hash = MD5.Create();
+            var data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(jsonString));
+            var sBuilder = new StringBuilder();
+
+            foreach (var c in data)
+            {
+                sBuilder.Append(c.ToString("x2"));
+            }
+
+            return sBuilder.ToString();
         }
     }
 }

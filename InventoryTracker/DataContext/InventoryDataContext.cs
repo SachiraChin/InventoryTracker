@@ -25,7 +25,7 @@ namespace InventoryTracker.DataContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_connectionString ?? @"Data Source=(localdb)\ProjectsV13;Initial Catalog=InventoryDb;");
+            optionsBuilder.UseSqlServer(_connectionString ?? @"Data Source=(localdb)\ProjectsV13;Initial Catalog=InventoryDb2;");
         }
     }
 }

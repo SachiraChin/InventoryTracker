@@ -51,7 +51,13 @@
                 </Grid.ColumnDefinitions>
                 <ComboBox ItemsSource="{Binding SearchFilteredRegions, Mode=TwoWay}" DisplayMemberPath="RegionName" SelectedValuePath="RegionId" SelectedValue="{Binding SearchRegionId, Mode=TwoWay}"></ComboBox>
                 <ComboBox Grid.Column="1" ItemsSource="{Binding SearchFilteredDivisions, Mode=OneWay}" DisplayMemberPath="DivisionName" SelectedValuePath="DivisionId" SelectedValue="{Binding SearchDivisionId, Mode=TwoWay}"></ComboBox>
-                <TextBox Grid.Column="2" Text="{Binding SearchText, Mode=TwoWay}" VerticalContentAlignment="Center"></TextBox>
+                <TextBox Grid.Column="2" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="KeyUp">
+                            <helpers:EventToCommand Command="{Binding SearchKeyUpCommand}" PassEventArgsToCommand="True" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
                 <Button Grid.Column="3" Command="{Binding SearchCommand}">Search</Button>
             </Grid>
         </Grid>
@@ -109,23 +115,11 @@
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <DatePicker SelectedDate="{Binding BorrowedDate, Mode=TwoWay}" />
+                                <DatePicker SelectedDate="{Binding BorrowedDate, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" SelectedDateChanged="BorrowedDatePicker_OnSelectedDateChanged" Loaded="BorrowedDatePicker_OnLoaded" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridCheckBoxColumn Header="Returned" Binding="{Binding Returned, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="70"></DataGridCheckBoxColumn>
-                    <DataGridTemplateColumn Header="Returned Date" Width="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ReturnedDate, Mode=OneWay, StringFormat=d}" IsEnabled="False" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <DatePicker SelectedDate="{Binding ReturnedDate, Mode=TwoWay}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGridCheckBoxColumn Header="Is Working" Binding="{Binding IsWorking, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="70"></DataGridCheckBoxColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <Button Grid.Row="1" IsEnabled="{Binding EnableInventoryItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Command="{Binding SaveInventoryItemsCommand}">Save Inventory</Button>
