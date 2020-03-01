@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryTracker.DataContext
 {
@@ -9,5 +10,7 @@ namespace InventoryTracker.DataContext
         [ForeignKey("Region")]
         public int RegionId { get; set; }
         public Region Region { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTimeOffset? DeletedDate { get; set; }
     }
 }

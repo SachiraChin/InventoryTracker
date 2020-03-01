@@ -4,14 +4,16 @@ using InventoryTracker.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InventoryTracker.DataContext.Migrations
 {
     [DbContext(typeof(InventoryDataContext))]
-    partial class InventoryDataContextModelSnapshot : ModelSnapshot
+    [Migration("20200301165914_IsDeletedAddedToDivisionAndRegion")]
+    partial class IsDeletedAddedToDivisionAndRegion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
