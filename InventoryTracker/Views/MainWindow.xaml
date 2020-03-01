@@ -150,12 +150,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Division Id" Binding="{Binding DivisionId, Mode=OneWay}" IsReadOnly="True" Width="80"></DataGridTextColumn>
                     <DataGridTextColumn Header="Division Name" Binding="{Binding DivisionName, Mode=TwoWay}" Width="100"></DataGridTextColumn>
-                    <DataGridComboBoxColumn Header="Region" 
-                                            SelectedItemBinding="{Binding Region, Mode=TwoWay}" 
-                                            SelectedValuePath="RegionId" 
-                                            DisplayMemberPath="RegionName" 
-                                            Width="100">
-
+                    <DataGridComboBoxColumn Header="Region" SelectedItemBinding="{Binding Region, Mode=TwoWay}" SelectedValuePath="RegionId" DisplayMemberPath="RegionName" Width="100">
                         <DataGridComboBoxColumn.ElementStyle>
                             <Style TargetType="ComboBox">
                                 <Setter Property="ItemsSource" Value="{Binding Path=DataContext.Regions, RelativeSource={RelativeSource AncestorType=Window}}" />

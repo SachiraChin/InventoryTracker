@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace InventoryTracker.Migrations
+namespace InventoryTracker.DataContext.Migrations
 {
     public partial class ReturnedAndBorrowedDatesAdded : Migration
     {

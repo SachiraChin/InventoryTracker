@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace InventoryTracker.Migrations
+namespace InventoryTracker.DataContext.Migrations
 {
     public partial class Initial : Migration
     {

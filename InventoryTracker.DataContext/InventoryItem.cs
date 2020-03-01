@@ -24,5 +24,7 @@ namespace InventoryTracker.DataContext
         public string ItemCondition { get; set; }
         public DateTimeOffset BorrowedDate { get; set; }
         public bool IsWorking { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTimeOffset? DeletedDate { get; set; }
     }
 }

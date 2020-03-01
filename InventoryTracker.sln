@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker", "InventoryTracker\InventoryTracker.csproj", "{686ED30F-E43D-4E0B-BE10-2F4CD8BE0974}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker", "InventoryTracker\InventoryTracker.csproj", "{686ED30F-E43D-4E0B-BE10-2F4CD8BE0974}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.DataContext", "InventoryTracker.DataContext\InventoryTracker.DataContext.csproj", "{075274F3-053E-4541-8E00-1B29F8FD4311}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{686ED30F-E43D-4E0B-BE10-2F4CD8BE0974}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{686ED30F-E43D-4E0B-BE10-2F4CD8BE0974}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{686ED30F-E43D-4E0B-BE10-2F4CD8BE0974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{075274F3-053E-4541-8E00-1B29F8FD4311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{075274F3-053E-4541-8E00-1B29F8FD4311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{075274F3-053E-4541-8E00-1B29F8FD4311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{075274F3-053E-4541-8E00-1B29F8FD4311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
