@@ -6,12 +6,16 @@
         xmlns:local="clr-namespace:InventoryTracker"
         xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
         xmlns:helpers="clr-namespace:InventoryTracker.Helpers"
+        xmlns:models="clr-namespace:InventoryTracker.Models"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
         Title="Inventory Manager" Height="450" Width="800" WindowStartupLocation="CenterScreen" WindowState="Maximized"
         DataContext="{Binding MainViewModel, Source={StaticResource Locator}}">
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+        <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <system:Boolean x:Key="True">True</system:Boolean>
+        <system:Boolean x:Key="False">False</system:Boolean>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
@@ -40,10 +44,12 @@
                     <ColumnDefinition Width="150"></ColumnDefinition>
                     <ColumnDefinition Width="150"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="200"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Region"></TextBlock>
                 <TextBlock Grid.Column="1" Text="Division"></TextBlock>
                 <TextBlock Grid.Column="2" Text="Search"></TextBlock>
+                <CheckBox Grid.Column="3" IsChecked="{Binding ShowDeleted}">Show Deleted Items</CheckBox>
             </Grid>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -70,6 +76,18 @@
                 <RowDefinition Height="30"></RowDefinition>
             </Grid.RowDefinitions>
             <DataGrid ItemsSource="{Binding InventoryItems, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="False" IsEnabled="{Binding EnableInventoryItems, Mode=OneWay}" SelectedItem="{Binding SelectedInventoryItem, Mode=TwoWay}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                                <Setter Property="Background" Value="Orange"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDeleted}" Value="False">
+                                <Setter Property="Background" Value="White"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id" Binding="{Binding InventoryItemId, Mode=OneWay}" IsReadOnly="True" Width="50"></DataGridTextColumn>
                     <DataGridTextColumn Header="Borrower Name" Binding="{Binding BorrowerName, Mode=TwoWay}" Width="100"></DataGridTextColumn>
@@ -123,6 +141,16 @@
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
                     <DataGridCheckBoxColumn Header="Is Working" Binding="{Binding IsWorking, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="70"></DataGridCheckBoxColumn>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:InventoryItemModel}">
+                                <Grid>
+                                    <Button Visibility="{Binding IsDeleted, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={StaticResource False}}" Command="{Binding DeleteCommand}">Delete</Button>
+                                    <Button Visibility="{Binding IsDeleted, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding RestoreCommand}">Restore</Button>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <Button Grid.Row="1" IsEnabled="{Binding EnableInventoryItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Command="{Binding SaveInventoryItemsCommand}">Save Inventory</Button>
@@ -134,9 +162,31 @@
                 <RowDefinition Height="30"></RowDefinition>
             </Grid.RowDefinitions>
             <DataGrid ItemsSource="{Binding Regions, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="False" IsEnabled="{Binding EnableRegions, Mode=OneWay}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                                <Setter Property="Background" Value="Orange"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDeleted}" Value="False">
+                                <Setter Property="Background" Value="White"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Region Id" Binding="{Binding RegionId, Mode=OneWay}" IsReadOnly="True" Width="80"></DataGridTextColumn>
                     <DataGridTextColumn Header="Region Name" Binding="{Binding RegionName, Mode=TwoWay}" Width="100"></DataGridTextColumn>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:RegionModel}">
+                                <Grid>
+                                    <Button Visibility="{Binding IsDeleted, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={StaticResource False}}" Command="{Binding DeleteCommand}">Delete</Button>
+                                    <Button Visibility="{Binding IsDeleted, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding RestoreCommand}">Restore</Button>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <Button Grid.Row="1" IsEnabled="{Binding EnableRegions, Mode=OneWay}" Command="{Binding SaveRegionsCommand}">Save Regions</Button>
@@ -147,6 +197,18 @@
                 <RowDefinition Height="30"></RowDefinition>
             </Grid.RowDefinitions>
             <DataGrid ItemsSource="{Binding Divisions, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="False" IsEnabled="{Binding EnableDivisions, Mode=OneWay}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                                <Setter Property="Background" Value="Orange"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDeleted}" Value="False">
+                                <Setter Property="Background" Value="White"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Division Id" Binding="{Binding DivisionId, Mode=OneWay}" IsReadOnly="True" Width="80"></DataGridTextColumn>
                     <DataGridTextColumn Header="Division Name" Binding="{Binding DivisionName, Mode=TwoWay}" Width="100"></DataGridTextColumn>
@@ -162,6 +224,16 @@
                             </Style>
                         </DataGridComboBoxColumn.EditingElementStyle>
                     </DataGridComboBoxColumn>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:DivisionModel}">
+                                <Grid>
+                                    <Button Visibility="{Binding IsDeleted, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={StaticResource False}}" Command="{Binding DeleteCommand}">Delete</Button>
+                                    <Button Visibility="{Binding IsDeleted, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding RestoreCommand}">Restore</Button>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <Button Grid.Row="1" IsEnabled="{Binding EnableRegions, Mode=OneWay}" Command="{Binding SaveDivisionsCommand}">Save Divisions</Button>

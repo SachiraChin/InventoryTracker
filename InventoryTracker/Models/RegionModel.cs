@@ -10,6 +10,8 @@ namespace InventoryTracker.Models
     {
         private int _regionId;
         private string _regionName;
+        private bool _isDeleted;
+        private DateTimeOffset? _deletedDate;
 
         public int RegionId
         {
@@ -29,6 +31,54 @@ namespace InventoryTracker.Models
                 _regionName = value;
                 RaisePropertyChanged();
             }
+        }
+
+        public bool IsDeleted
+        {
+            get => _isDeleted;
+            set
+            {
+                _isDeleted = value;
+                RaisePropertyChanged();
+
+                if (value)
+                {
+                    DeletedDate = DateTimeOffset.Now;
+                }
+                else
+                {
+                    DeletedDate = null;
+                }
+            }
+        }
+
+        public DateTimeOffset? DeletedDate
+        {
+            get => _deletedDate;
+            set
+            {
+                _deletedDate = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public RelayCommand DeleteCommand { get; set; }
+        public RelayCommand RestoreCommand { get; set; }
+
+        public RegionModel()
+        {
+            DeleteCommand = new RelayCommand(DeleteCommandHandler);
+            RestoreCommand = new RelayCommand(RestoreCommandHandler);
+        }
+
+        private void RestoreCommandHandler()
+        {
+            IsDeleted = false;
+        }
+
+        private void DeleteCommandHandler()
+        {
+            IsDeleted = true;
         }
     }
 }

@@ -47,6 +47,7 @@ namespace InventoryTracker.ViewModels
         private string _searchText;
 
         private InventoryItemModel _selectedInventoryItem;
+        private bool _showDeleted;
 
         #endregion
 
@@ -208,6 +209,17 @@ namespace InventoryTracker.ViewModels
 
         public RelayCommand<RoutedEventArgs> ViewLoadedCommand { get; set; }
 
+        public bool ShowDeleted
+        {
+            get => _showDeleted;
+            set
+            {
+                _showDeleted = value;
+                RaisePropertyChanged();
+                ReloadAll();
+            }
+        }
+
         #endregion
 
         #region Constructors And Destructors
@@ -240,7 +252,7 @@ namespace InventoryTracker.ViewModels
             EnableDivisions = false;
 
             await using var dataContext = new InventoryDataContext(_connectionString);
-            var divisions = await dataContext.Divisions.ToListAsync();
+            var divisions = await dataContext.Divisions.Where(r => ShowDeleted || r.IsDeleted == false).ToListAsync();
             Divisions = new ObservableCollection<DivisionModel>(_mapper.Map<List<DivisionModel>>(divisions));
 
             foreach (var divisionModel in Divisions) divisionModel.Region = Regions.FirstOrDefault(e => e.RegionId == divisionModel.RegionId);
@@ -257,7 +269,8 @@ namespace InventoryTracker.ViewModels
                 .InventoryItems
                 .AsNoTracking()
                 .Where(i =>
-                    (regionId == null || regionId <= 0 || i.RegionId == regionId)
+                       (ShowDeleted || i.IsDeleted == false)
+                    && (regionId == null || regionId <= 0 || i.RegionId == regionId)
                     && (divisionId == null || divisionId <= 0 || i.DivisionId == divisionId)
                     && (searchText == null || searchText == ""
                                            || i.InventoryItemId.ToString().Contains(searchText)
@@ -289,7 +302,7 @@ namespace InventoryTracker.ViewModels
             EnableRegions = false;
 
             await using var dataContext = new InventoryDataContext(_connectionString);
-            var regions = await dataContext.Regions.ToListAsync();
+            var regions = await dataContext.Regions.Where(r => ShowDeleted || r.IsDeleted == false).ToListAsync();
             Regions = new ObservableCollection<RegionModel>(_mapper.Map<List<RegionModel>>(regions));
             EnableRegions = true;
         }
@@ -318,6 +331,7 @@ namespace InventoryTracker.ViewModels
             }
 
             await LoadDivisions();
+            await LoadInventoryItems(SearchRegionId, SearchDivisionId, SearchText);
 
             EnableDivisions = true;
         }
@@ -378,6 +392,8 @@ namespace InventoryTracker.ViewModels
             }
 
             await LoadRegions();
+            await LoadDivisions();
+            await LoadInventoryItems(SearchRegionId, SearchDivisionId, SearchText);
 
             EnableRegions = true;
         }
@@ -408,6 +424,12 @@ namespace InventoryTracker.ViewModels
             await LoadInventoryItems();
         }
 
+        private async void ReloadAll()
+        {
+            await LoadRegions();
+            await LoadDivisions();
+            await LoadInventoryItems(SearchRegionId, SearchDivisionId, SearchText);
+        }
         #endregion
     }
 }

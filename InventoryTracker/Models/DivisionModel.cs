@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 
 namespace InventoryTracker.Models
 {
@@ -11,6 +12,8 @@ namespace InventoryTracker.Models
         private string _divisionName;
         private int _regionId;
         private RegionModel _region;
+        private bool _isDeleted;
+        private DateTimeOffset? _deletedDate;
 
         public int DivisionId
         {
@@ -50,6 +53,54 @@ namespace InventoryTracker.Models
                 _region = value;
                 RaisePropertyChanged();
             }
+        }
+
+        public bool IsDeleted
+        {
+            get => _isDeleted;
+            set
+            {
+                _isDeleted = value;
+                RaisePropertyChanged();
+
+                if (value)
+                {
+                    DeletedDate = DateTimeOffset.Now;
+                }
+                else
+                {
+                    DeletedDate = null;
+                }
+            }
+        }
+
+        public DateTimeOffset? DeletedDate
+        {
+            get => _deletedDate;
+            set
+            {
+                _deletedDate = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public RelayCommand DeleteCommand { get; set; }
+        public RelayCommand RestoreCommand { get; set; }
+
+        public DivisionModel()
+        {
+            DeleteCommand = new RelayCommand(DeleteCommandHandler);
+            RestoreCommand = new RelayCommand(RestoreCommandHandler);
+        }
+
+        private void RestoreCommandHandler()
+        {
+            IsDeleted = false;
+        }
+
+        private void DeleteCommandHandler()
+        {
+            IsDeleted = true;
         }
     }
 }

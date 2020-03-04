@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 using InventoryTracker.Helpers;
 
 namespace InventoryTracker.Models
@@ -26,6 +27,8 @@ namespace InventoryTracker.Models
         private string _itemCondition;
         private DateTimeOffset _borrowedDate = DateTimeOffset.Now;
         private bool _isWorking = true;
+        private bool _isDeleted;
+        private DateTimeOffset? _deletedDate;
 
         public int InventoryItemId
         {
@@ -160,11 +163,60 @@ namespace InventoryTracker.Models
             }
         }
 
+        public bool IsDeleted
+        {
+            get => _isDeleted;
+            set
+            {
+                _isDeleted = value;
+                RaisePropertyChanged();
+
+                if (value)
+                {
+                    DeletedDate = DateTimeOffset.Now;
+                }
+                else
+                {
+                    DeletedDate = null;
+                }
+            }
+        }
+
+        public DateTimeOffset? DeletedDate
+        {
+            get => _deletedDate;
+            set
+            {
+                _deletedDate = value;
+                RaisePropertyChanged();
+            }
+        }
+
         [JsonIgnore]
         public string ItemHash { get; set; }
 
         [JsonIgnore]
         public List<DivisionModel> Divisions { get; set; }
+
+
+        public RelayCommand DeleteCommand { get; set; }
+        public RelayCommand RestoreCommand { get; set; }
+
+        public InventoryItemModel()
+        {
+            DeleteCommand = new RelayCommand(DeleteCommandHandler);
+            RestoreCommand = new RelayCommand(RestoreCommandHandler);
+        }
+
+        private void RestoreCommandHandler()
+        {
+            IsDeleted = false;
+        }
+
+        private void DeleteCommandHandler()
+        {
+            IsDeleted = true;
+        }
 
         private void SetDivisions(int regionId)
         {
