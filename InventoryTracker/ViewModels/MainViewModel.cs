@@ -47,6 +47,7 @@ namespace InventoryTracker.ViewModels
         private string _searchText;
 
         private InventoryItemModel _selectedInventoryItem;
+
         private bool _showDeleted;
 
         #endregion
@@ -132,9 +133,9 @@ namespace InventoryTracker.ViewModels
         public RelayCommand SaveDivisionsCommand { get; set; }
 
         public RelayCommand SaveInventoryItemsCommand { get; set; }
-        
+
         public RelayCommand SaveRegionsCommand { get; set; }
-        
+
         public RelayCommand SearchCommand { get; set; }
 
         public int? SearchDivisionId
@@ -205,10 +206,6 @@ namespace InventoryTracker.ViewModels
             }
         }
 
-        public RelayCommand ShowLeftPaneCommand { get; set; }
-
-        public RelayCommand<RoutedEventArgs> ViewLoadedCommand { get; set; }
-
         public bool ShowDeleted
         {
             get => _showDeleted;
@@ -219,6 +216,10 @@ namespace InventoryTracker.ViewModels
                 ReloadAll();
             }
         }
+
+        public RelayCommand ShowLeftPaneCommand { get; set; }
+
+        public RelayCommand<RoutedEventArgs> ViewLoadedCommand { get; set; }
 
         #endregion
 
@@ -269,7 +270,7 @@ namespace InventoryTracker.ViewModels
                 .InventoryItems
                 .AsNoTracking()
                 .Where(i =>
-                       (ShowDeleted || i.IsDeleted == false)
+                    (ShowDeleted || i.IsDeleted == false)
                     && (regionId == null || regionId <= 0 || i.RegionId == regionId)
                     && (divisionId == null || divisionId <= 0 || i.DivisionId == divisionId)
                     && (searchText == null || searchText == ""
@@ -305,6 +306,13 @@ namespace InventoryTracker.ViewModels
             var regions = await dataContext.Regions.Where(r => ShowDeleted || r.IsDeleted == false).ToListAsync();
             Regions = new ObservableCollection<RegionModel>(_mapper.Map<List<RegionModel>>(regions));
             EnableRegions = true;
+        }
+
+        private async void ReloadAll()
+        {
+            await LoadRegions();
+            await LoadDivisions();
+            await LoadInventoryItems(SearchRegionId, SearchDivisionId, SearchText);
         }
 
         private async void SaveDivisionsCommandHandler()
@@ -424,12 +432,6 @@ namespace InventoryTracker.ViewModels
             await LoadInventoryItems();
         }
 
-        private async void ReloadAll()
-        {
-            await LoadRegions();
-            await LoadDivisions();
-            await LoadInventoryItems(SearchRegionId, SearchDivisionId, SearchText);
-        }
         #endregion
     }
 }

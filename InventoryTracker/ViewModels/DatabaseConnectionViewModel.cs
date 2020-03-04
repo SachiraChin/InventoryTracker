@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,45 +16,39 @@ namespace InventoryTracker.ViewModels
 {
     public class DatabaseConnectionViewModel : ViewModelBase, IDialogValueProvider
     {
+        #region Static and constant members
+
         private const string ConfigFileName = "connection-info.json";
 
-        private SqlServerConnectionInfoModel _sqlServerConnectionInfo;
+        #endregion
 
-        public SqlServerConnectionInfoModel SqlServerConnectionInfo
-        {
-            get => _sqlServerConnectionInfo;
-            set
-            {
-                _sqlServerConnectionInfo = value;
-                RaisePropertyChanged();
-            }
-        }
+        #region Private fields
+
+        private bool _createDatabaseIfNotExists = true;
+
+        private bool _enabled = true;
 
         private bool _saveConnectionInfo = true;
 
-        public bool SaveConnectionInfo
+        private bool _showAdvancedOptions;
+
+        private SqlServerConnectionInfoModel _sqlServerConnectionInfo;
+
+        #endregion
+
+        #region Readonly properties
+
+        public Dictionary<SqlServerAuthenticationType, string> SqlServerAuthenticationTypes => new Dictionary<SqlServerAuthenticationType, string>
         {
-            get => _saveConnectionInfo;
-            set
-            {
-                _saveConnectionInfo = value;
-                RaisePropertyChanged();
-            }
-        }
+            [SqlServerAuthenticationType.SqlServerAuthentication] = "SQL Server Authentication",
+            [SqlServerAuthenticationType.WindowsAuthentication] = "Windows Authentication"
+        };
 
-        private bool _showAdvancedOptions = false;
+        #endregion
 
-        public bool ShowAdvancedOptions
-        {
-            get => _showAdvancedOptions;
-            set
-            {
-                _showAdvancedOptions = value;
-                RaisePropertyChanged();
-            }
-        }
+        #region Properties
 
-        private bool _createDatabaseIfNotExists = true;
+        public RelayCommand ConnectToDatabaseCommand { get; set; }
 
         public bool CreateDatabaseIfNotExists
         {
@@ -67,8 +60,6 @@ namespace InventoryTracker.ViewModels
             }
         }
 
-        private bool _enabled = true;
-
         public bool Enabled
         {
             get => _enabled;
@@ -79,14 +70,39 @@ namespace InventoryTracker.ViewModels
             }
         }
 
-        public RelayCommand ConnectToDatabaseCommand { get; set; }
-
-        public Dictionary<SqlServerAuthenticationType, string> SqlServerAuthenticationTypes => new Dictionary<SqlServerAuthenticationType, string>()
+        public bool SaveConnectionInfo
         {
-            [SqlServerAuthenticationType.SqlServerAuthentication] = "SQL Server Authentication",
-            [SqlServerAuthenticationType.WindowsAuthentication] = "Windows Authentication",
-        };
+            get => _saveConnectionInfo;
+            set
+            {
+                _saveConnectionInfo = value;
+                RaisePropertyChanged();
+            }
+        }
 
+        public bool ShowAdvancedOptions
+        {
+            get => _showAdvancedOptions;
+            set
+            {
+                _showAdvancedOptions = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public SqlServerConnectionInfoModel SqlServerConnectionInfo
+        {
+            get => _sqlServerConnectionInfo;
+            set
+            {
+                _sqlServerConnectionInfo = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion
+
+        #region Constructors And Destructors
 
         public DatabaseConnectionViewModel()
         {
@@ -103,8 +119,24 @@ namespace InventoryTracker.ViewModels
             {
                 SqlServerConnectionInfo = new SqlServerConnectionInfoModel();
             }
+
             ConnectToDatabaseCommand = new RelayCommand(ConnectToDatabaseCommandHandler);
         }
+
+        #endregion
+
+        #region IDialogValueProvider implementations
+
+        public event EventHandler CloseDialog;
+
+        public object GetValue()
+        {
+            return SqlServerConnectionInfo.GetConnectionString();
+        }
+
+        #endregion
+
+        #region Private members
 
         private async void ConnectToDatabaseCommandHandler()
         {
@@ -130,7 +162,7 @@ namespace InventoryTracker.ViewModels
             await using var connection = new SqlConnection(connectionString);
             await using var checkDatabaseExistsCommand = new SqlCommand($"SELECT db_id('{SqlServerConnectionInfo.DatabaseName}')", connection);
             await connection.OpenAsync();
-            var exists = (await checkDatabaseExistsCommand.ExecuteScalarAsync() != DBNull.Value);
+            var exists = await checkDatabaseExistsCommand.ExecuteScalarAsync() != DBNull.Value;
 
             if (exists == false && CreateDatabaseIfNotExists == false)
             {
@@ -146,12 +178,12 @@ namespace InventoryTracker.ViewModels
 
             if (SaveConnectionInfo)
             {
-                var saveModel = new DatabaseConnectionSaveModel()
+                var saveModel = new DatabaseConnectionSaveModel
                 {
                     SqlServerConnectionInfo = SqlServerConnectionInfo,
                     SaveConnectionInfo = SaveConnectionInfo,
                     CreateDatabaseIfNotExists = CreateDatabaseIfNotExists,
-                    ShowAdvancedOptions = ShowAdvancedOptions,
+                    ShowAdvancedOptions = ShowAdvancedOptions
                 };
 
                 var jsonString = JsonSerializer.Serialize(saveModel);
@@ -166,11 +198,6 @@ namespace InventoryTracker.ViewModels
             await dataContext.Database.MigrateAsync();
         }
 
-        public object GetValue()
-        {
-            return SqlServerConnectionInfo.GetConnectionString();
-        }
-
-        public event EventHandler CloseDialog;
+        #endregion
     }
 }
